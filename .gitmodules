@@ -1,0 +1,3 @@
+[submodule "Fec"]
+	path = Fec
+	url = https://github.com/Rpp35-Fec-Ethernet/Fec.git
