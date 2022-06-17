@@ -15,4 +15,20 @@ describe('Hello world server', () => {
           done();
          })
   })
+
+  it('Responds correctly to different routes', (done) => {
+    chai.request(app).get('/qa/questions')
+    .end((err, res) => {
+      expect(err).to.be.null;
+      expect(res.text).to.equal('Questions');
+      expect(res.status).to.equal(200);
+    })
+    chai.request(app).get('/qa/questions/1000/answers')
+    .end((err, res) => {
+      expect(err).to.be.null;
+      expect(res.text).to.equal('Answers for Question id 1000');
+      expect(res.status).to.equal(200);
+      done();
+    })
+  })
 })
