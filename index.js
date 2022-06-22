@@ -1,4 +1,11 @@
 const express = require('express')
+const pgp = require('pg-promise')();
+const config = {
+  host: 'localhost',
+  port: 5432,
+  database: 'sdc'
+};
+const db = pgp(config);
 const app = express()
 const port = process.env.PORT || 3000;
 
@@ -7,6 +14,9 @@ app.get('/', (req, res) => {
 })
 
 app.get('/qa/questions', (req, res) => {
+  db.any('SELECT * FROM sdc.questions')
+    .then((res) => {console.log(res)})
+    .catch((err) => {console.log(err)});
   res.status(200).send('Questions');
 })
 
