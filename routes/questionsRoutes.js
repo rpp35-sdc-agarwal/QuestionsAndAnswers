@@ -13,14 +13,17 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/test', (req, res) => {
-  res.send('test successful');
-});
+// router.get('/test', (req, res) => {
+//   res.send('test successful');
+// });
 
 router.get('/', (req, res) => {
-  db.any('SELECT * FROM qa.questions')
-    .then((res) => {console.log(res)})
-    .catch((err) => {console.log(err)});
+  //parse the req body
+  //retrieve the product id, page number if there is one and the result count
+
+  // db.any('SELECT * FROM qa.questions')
+  //   .then((res) => {console.log(res)})
+  //   .catch((err) => {console.log(err)});
   res.status(200).send('Questions');
 })
 
