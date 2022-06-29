@@ -1,53 +1,17 @@
 const express = require('express')
-const pgp = require('pg-promise')();
-const config = {
-  host: 'localhost',
-  port: 5432,
-  database: 'sdc'
-};
-const db = pgp(config);
 const app = express()
 const port = process.env.PORT || 3000;
+const qRouter = require('./routes/questionsRoutes.js');
+const aRouter = require('./routes/answersRoutes.js');
+
+app.use(express.json());
+app.use(express.urlencoded());
+app.use('/qa/questions', qRouter);
+app.use('/qa/answers', aRouter);
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
-})
-
-app.get('/qa/questions', (req, res) => {
-  db.any('SELECT * FROM sdc.questions')
-    .then((res) => {console.log(res)})
-    .catch((err) => {console.log(err)});
-  res.status(200).send('Questions');
-})
-
-app.get('/qa/questions/:question_id/answers', (req, res) => {
-  res.status(200).send(`Answers for Question id ${req.params.question_id}`)
-})
-
-app.post('/qa/questions', (req, res) => {
-  res.status().send()
-})
-
-app.post('/qa/questions/:question_id/answers', (req, res) => {
-  res.status().send()
-})
-
-app.put('/qa/questions/:question_id/helpful', (req, res) => {
-  res.status().send()
-})
-
-app.put('/qa/questions/:question_id/report', (req, res) => {
-  res.status().send()
-})
-
-app.put('/qa/answers/:answer_id/helpful', (req, res) => {
-  res.status().send()
-})
-
-app.put('/qa/answers/:answer_id/report', (req, res) => {
-  res.status().send()
-})
-
+});
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`)
