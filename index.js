@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const qRouter = require('./routes/questionsRoutes.js');
-const aRouter = require('./routes/answerRoutes.js');
+const aRouter = require('./routes/answersRoutes.js');
 
 app.use(express.json());
 app.use(express.urlencoded());

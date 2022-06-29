@@ -8,12 +8,12 @@ const config = {
 const db = pgp(config);
 const router = express.Router();
 
-router.put('/qa/answers/:answer_id/helpful', (req, res) => {
-  res.status().send()
+router.put('/:answer_id/helpful', (req, res) => {
+  res.status(201).send(`Answer ${req.params.answer_id} marked as helpful`);
 })
 
-router.put('/qa/answers/:answer_id/report', (req, res) => {
-  res.status().send()
+router.put('/:answer_id/report', (req, res) => {
+  res.status(201).send(`Answer ${req.params.answer_id} reported`);
 })
 
 module.exports = router;
