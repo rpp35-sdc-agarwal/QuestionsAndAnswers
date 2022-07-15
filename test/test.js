@@ -6,20 +6,43 @@ var app = require('../index.js');
 chai.use(http);
 
 describe('Api Routes', () => {
-  it('get questions responds correctly', (done) => {
-    chai.request(app).get('/qa/questions')
-      .end((err, res) => {
+  it('get questions returns the proper status code and data', (done) => {
+    chai.request(app)
+      .get('/qa/questions')
+      .send({ product_id: 1000 })
+      .end(function(err, res) {
         if(err) {
-          console.log(err)
-        } else {
-          expect(res).to.have.status(200);
-          expect(res.text).to.equal('Questions');
+          console.log(err);
+          done();
         }
+        expect(res).to.have.status(200);
+        expect(res.body).to.eql([
+          {
+            question_id: 3506,
+            product_id: 1000,
+            question_body: 'Quo commodi qui rerum quos dolore voluptas perspiciatis.',
+            question_date: '1598318729860',
+            username: 'Murray.Bernier',
+            email: 'Salma.Pacocha32@hotmail.com',
+            helpful: 28,
+            reported: false
+          },
+          {
+            question_id: 3507,
+            product_id: 1000,
+            question_body: 'Beatae illo delectus velit.',
+            question_date: '1604283189400',
+            username: 'Talon62',
+            email: 'Garrick.Pagac@hotmail.com',
+            helpful: 7,
+            reported: false
+          }
+        ]);
         done();
       });
   });
 
-  it('get question answers responds correctly', (done) => {
+  it('get question answers returns the proper status code and data', (done) => {
     chai.request(app)
       .get('/qa/questions/1000/answers')
       .end((err, res) => {
@@ -33,7 +56,7 @@ describe('Api Routes', () => {
       });
   });
 
-  it('posting a question responds properly', (done) => {
+  it('posting a question returns the proper status code and data', (done) => {
     chai.request(app)
       .post('/qa/questions')
       .end((err, res) => {
@@ -47,7 +70,7 @@ describe('Api Routes', () => {
       });
   });
 
-  it('posting an answer responds properly', (done) => {
+  it('posting an answer returns the proper status code and data', (done) => {
     chai.request(app)
       .post('/qa/questions/1000/answers')
       .end((err, res) => {
