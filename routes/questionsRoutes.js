@@ -14,11 +14,10 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
   //parse the req body
-  console.log(req.body)
+    console.log(req.body, req.params);
   //retrieve the product id, page number if there is one and the result count
   db.any(`SELECT * FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.body.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
     .then((data) => {
-      console.log(data);
       var questions = {
         product_id: req.body.product_id
       };
@@ -103,7 +102,7 @@ router.get('/', (req, res) => {
       };
       res.status(200).send(finalShape);
     })
-    .catch((err) => {res.status(500).send(err)});
+    .catch((err) => { console.log(err); res.status(500).send(err)});
 })
 
 router.get('/:question_id/answers', (req, res) => {
