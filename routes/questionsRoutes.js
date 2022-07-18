@@ -14,12 +14,12 @@ const router = express.Router();
 
 router.get('/', (req, res) => {
   //parse the req body
-    console.log(req.body, req.params);
+
   //retrieve the product id, page number if there is one and the result count
-  db.any(`SELECT * FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.body.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
+  db.any(`SELECT * FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.query.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
     .then((data) => {
       var questions = {
-        product_id: req.body.product_id
+        product_id: req.query.product_id
       };
       var photos = {};
       for (var i = 0; i < data.length; i++) {
@@ -85,6 +85,7 @@ router.get('/', (req, res) => {
           questions[questionId].answers[answerId].photos.push(newP);
         }
       }
+
       return questions;
     })
     .then((shapedData) => {
@@ -100,13 +101,16 @@ router.get('/', (req, res) => {
         product_id: shapedData.product_id,
         results: results
       };
+
       res.status(200).send(finalShape);
     })
     .catch((err) => { console.log(err); res.status(500).send(err)});
 })
 
 router.get('/:question_id/answers', (req, res) => {
-  db.any(`SELECT * FROM qa.answers LEFT JOIN qa.photos ON qa.photos.answer_id = qa.answers.id WHERE question_id = ${req.params.question_id}`)
+
+
+  db.any(`SELECT * FROM qa.answers LEFT JOIN qa.photos ON qa.photos.answer_id = qa.answers.id WHERE question_id = ${req.params.question_id} AND qa.answers.answer_reported = false;`)
     .then((data) => {
       //iterate through the data sent from the db
       var answers = {};
@@ -148,7 +152,7 @@ router.get('/:question_id/answers', (req, res) => {
         results.push(answers[ansId]);
       }
       var finalShape = {
-        question: req.body.question_id,
+        question: req.params.question_id,
         count: results.length,
         results: results
       }
@@ -162,6 +166,7 @@ router.get('/:question_id/answers', (req, res) => {
 /////////////////////
 
 router.post('/', (req, res) => {
+
   //insert query that will use the data from the body as its arguments
   //create a new date when the question is recieved, in the millisecond format and send it as a string to the db,
   var date = new Date().valueOf().toString();
@@ -178,7 +183,7 @@ router.post('/', (req, res) => {
 })
 
 router.post('/:question_id/answers', (req, res) => {
-  console.log(req.body, req.params);
+
   var date = new Date().valueOf().toString();
   db.none(
     `INSERT INTO qa.answers (body, date, answerer_name, answer_email, question_id, answer_reported, helpfulness)
@@ -196,6 +201,7 @@ router.post('/:question_id/answers', (req, res) => {
 /////////////////////
 
 router.put('/:question_id/helpful', (req, res) => {
+
   db.none(`UPDATE qa.questions SET question_helpfulness = question_helpfulness + 1 WHERE question_id = ${req.params.question_id}`)
     .then((data) => {
       console.log(data);
@@ -205,7 +211,7 @@ router.put('/:question_id/helpful', (req, res) => {
 })
 
 router.put('/:question_id/report', (req, res) => {
-  console.log(req.params);
+
   db.none(`UPDATE qa.questions SET reported = true WHERE question_id = ${req.params.question_id}`)
   .then((data) => {
     console.log(data);

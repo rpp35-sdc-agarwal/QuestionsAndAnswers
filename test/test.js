@@ -6,9 +6,9 @@ var app = require('../index.js');
 chai.use(http);
 
 describe('Api Routes', () => {
-  it('get questions returns the proper status code and data', (done) => {
+  it('get questions returns the proper status code and data shape', (done) => {
     chai.request(app)
-      .get('/qa/questions')
+      .get('/qa/questions?product_id=1000')
       .send({ product_id: 1000 })
       .end(function(err, res) {
         if(err) {
@@ -16,28 +16,9 @@ describe('Api Routes', () => {
           done();
         }
         expect(res).to.have.status(200);
-        expect(res.body).to.eql([
-          {
-            question_id: 3506,
-            product_id: 1000,
-            question_body: 'Quo commodi qui rerum quos dolore voluptas perspiciatis.',
-            question_date: '1598318729860',
-            username: 'Murray.Bernier',
-            email: 'Salma.Pacocha32@hotmail.com',
-            helpful: 28,
-            reported: false
-          },
-          {
-            question_id: 3507,
-            product_id: 1000,
-            question_body: 'Beatae illo delectus velit.',
-            question_date: '1604283189400',
-            username: 'Talon62',
-            email: 'Garrick.Pagac@hotmail.com',
-            helpful: 7,
-            reported: false
-          }
-        ]);
+        expect(typeof res.body.product_id).to.eql('string');
+        expect(Array.isArray(res.body.results)).to.eql(true);
+        expect(typeof res.body.results[0]).to.eql('object');
         done();
       });
   });
@@ -50,7 +31,10 @@ describe('Api Routes', () => {
           console.log(err)
         } else {
           expect(res).to.have.status(200);
-          expect(res.text).to.equal('Answers for question 1000');
+          expect(res.body.question).to.eql('1000');
+          expect(typeof res.body.count).to.eql('number');
+          expect(Array.isArray(res.body.results)).to.eql(true);
+          expect(res.body.results.length).to.eql(res.body.count);
         }
         done();
       });
@@ -59,12 +43,18 @@ describe('Api Routes', () => {
   it('posting a question returns the proper status code and data', (done) => {
     chai.request(app)
       .post('/qa/questions')
+      .send({
+        body: 'how do I turn it on',
+        name: 'loaf',
+        email: 'email address',
+        product_id: 1000
+      })
       .end((err, res) => {
         if(err) {
           console.log(err)
         } else {
           expect(res).to.have.status(201);
-          expect(res.text).to.equal('Question posted');
+          expect(res.text).to.equal('Question posted!');
         }
         done();
       });
