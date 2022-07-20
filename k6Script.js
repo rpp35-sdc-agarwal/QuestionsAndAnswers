@@ -5,13 +5,13 @@ import {sleep} from 'k6';
 export const options = {
   stages: [
     {duration: '1s', target: 1},
-    {duration: '1m', target: 1},
+    {duration: '1s', target: 1},
     {duration: '1s', target: 10},
-    {duration: '1m', target: 10},
+    {duration: '1s', target: 10},
     {duration: '1s', target: 100},
-    {duration: '1m', target: 100},
+    {duration: '1s', target: 100},
     {duration: '1s', target: 1000},
-    {duration: '1m', target: 1000}
+    {duration: '1s', target: 1000}
   ]
 }
 
@@ -20,7 +20,8 @@ export default function() {
 
 
   const responses = http.batch([
-    ['GET', `${baseURL}/qa/questions`]
+    ['GET', `${baseURL}/qa/questions?product_id=1000011`, null, null],
+    ['GET', `${baseURL}/qa/questions/3518952/answers`, null, null]
   ])
 
   sleep(1);
@@ -28,7 +29,7 @@ export default function() {
 
 export function handleSummary(data) {
   return {
-    "summary.html": htmlReport(data),
+    "summary.html": htmlReport(data)
   };
 }
 
