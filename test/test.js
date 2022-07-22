@@ -6,20 +6,24 @@ var app = require('../index.js');
 chai.use(http);
 
 describe('Api Routes', () => {
-  it('get questions responds correctly', (done) => {
-    chai.request(app).get('/qa/questions')
-      .end((err, res) => {
+  it('get questions returns the proper status code and data shape', (done) => {
+    chai.request(app)
+      .get('/qa/questions?product_id=1000')
+      .send({ product_id: 1000 })
+      .end(function(err, res) {
         if(err) {
-          console.log(err)
-        } else {
-          expect(res).to.have.status(200);
-          expect(res.text).to.equal('Questions');
+          console.log(err);
+          done();
         }
+        expect(res).to.have.status(200);
+        expect(typeof res.body.product_id).to.eql('string');
+        expect(Array.isArray(res.body.results)).to.eql(true);
+        expect(typeof res.body.results[0]).to.eql('object');
         done();
       });
   });
 
-  it('get question answers responds correctly', (done) => {
+  it('get question answers returns the proper status code and data', (done) => {
     chai.request(app)
       .get('/qa/questions/1000/answers')
       .end((err, res) => {
@@ -27,27 +31,36 @@ describe('Api Routes', () => {
           console.log(err)
         } else {
           expect(res).to.have.status(200);
-          expect(res.text).to.equal('Answers for question 1000');
+          expect(res.body.question).to.eql('1000');
+          expect(typeof res.body.count).to.eql('number');
+          expect(Array.isArray(res.body.results)).to.eql(true);
+          expect(res.body.results.length).to.eql(res.body.count);
         }
         done();
       });
   });
 
-  it('posting a question responds properly', (done) => {
+  it('posting a question returns the proper status code and data', (done) => {
     chai.request(app)
       .post('/qa/questions')
+      .send({
+        body: 'how do I turn it on',
+        name: 'loaf',
+        email: 'email address',
+        product_id: 1000
+      })
       .end((err, res) => {
         if(err) {
           console.log(err)
         } else {
           expect(res).to.have.status(201);
-          expect(res.text).to.equal('Question posted');
+          expect(res.text).to.equal('Question posted!');
         }
         done();
       });
   });
 
-  it('posting an answer responds properly', (done) => {
+  it('posting an answer returns the proper status code and data', (done) => {
     chai.request(app)
       .post('/qa/questions/1000/answers')
       .end((err, res) => {

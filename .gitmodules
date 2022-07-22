@@ -1,3 +1,6 @@
-[submodule "Fec"]
-	path = Fec
-	url = https://github.com/Rpp35-Fec-Ethernet/Fec.git
+[submodule "Client"]
+	path = Client
+	url = https://github.com/rpp35-IPMEN/FEC.git
+[submodule "newFEC"]
+	path = newFEC
+	url = https://github.com/rpp35-IPMEN/FEC.git
