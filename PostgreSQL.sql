@@ -7,26 +7,26 @@ CREATE TABLE "questions" (
   "product_id" int NOT NULL,
   "question_body" varchar(1000) NOT NULL,
   "question_date" varchar NOT NULL,
-  "username" varchar(60) NOT NULL,
+  "asker_name" varchar(60) NOT NULL,
   "email" varchar(60) NOT NULL,
-  "helpful" int,
+  "question_helpfulness" int,
   "reported" boolean
 );
 
 CREATE TABLE "answers" (
-  "answer_id" SERIAL PRIMARY KEY,
-  "answer_body" varchar(1000) NOT NULL,
-  "answer_date" varchar NOT NULL,
-  "username" varchar(60) NOT NULL,
-  "email" varchar(60) NOT NULL,
+  "id" SERIAL PRIMARY KEY,
+  "body" varchar(1000) NOT NULL,
+  "date" varchar NOT NULL,
+  "answerer_name" varchar(60) NOT NULL,
+  "answer_email" varchar(60) NOT NULL,
   "question_id" int,
-  "reported" boolean,
-  "helpful" int
+  "answer_reported" boolean,
+  "helpfulness" int
 );
 
 CREATE TABLE "photos" (
   "photo_id" SERIAL PRIMARY KEY,
-  "photo_url" varchar NOT NULL,
+  "url" varchar NOT NULL,
   "answer_id" int
 );
 

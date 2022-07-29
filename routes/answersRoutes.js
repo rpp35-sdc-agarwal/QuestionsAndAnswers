@@ -1,11 +1,13 @@
 const express = require('express');
 const pgp = require('pg-promise')();
-const config = {
-  host: 'localhost',
+const connConfig = {
+  host: '54.176.67.216',
   port: 5432,
-  database: 'sdc'
+  database: 'postgres',
+  username: 'postgres',
+  password: 'root'
 };
-const db = pgp(config);
+const db = pgp(connConfig);
 const router = express.Router();
 
 router.put('/:answer_id/helpful', (req, res) => {
