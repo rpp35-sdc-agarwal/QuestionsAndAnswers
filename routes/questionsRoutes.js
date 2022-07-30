@@ -4,7 +4,7 @@ const connConfig = {
   host: '13.52.106.252',
   port: 5432,
   database: 'postgres',
-  username: 'postgres',
+  user: 'postgres',
   password: 'root'
 };
 const db = pgp(connConfig);
