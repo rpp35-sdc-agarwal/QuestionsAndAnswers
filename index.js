@@ -16,6 +16,10 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
+app.get('/loaderio-b7adecd4f0a1dd2ed05ad3841c798d1b.txt', (req, res) => {
+  res.send()
+})
+
 app.listen(port, () => {
   console.log(`App listening on port ${port}`)
 })
