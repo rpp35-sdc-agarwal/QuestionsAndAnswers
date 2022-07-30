@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/loaderio-b7adecd4f0a1dd2ed05ad3841c798d1b.txt', (req, res) => {
-  res.send()
+  res.sendFile('../loaderio-b7adecd4f0a1dd2ed05ad3841c798d1b.txt');
 })
 
 app.listen(port, () => {
