@@ -1,7 +1,7 @@
 const express = require('express');
 const pgp = require('pg-promise')();
 const connConfig = {
-  host: '54.176.67.216',
+  host: '13.52.106.252',
   port: 5432,
   database: 'postgres',
   username: 'postgres',
