@@ -1,6 +1,8 @@
-const newrelic = require('newrelic');
-const express = require('express')
-const app = express()
+// const newrelic = require('newrelic');
+const redis = require('redis');
+const client = redis.createClient({url:'redis://ubuntu@52.52.238.201:6739'});
+const express = require('express');
+const app = express();
 const port = process.env.PORT || 8000;
 const bodyParser = require('body-parser');
 const qRouter = require('./routes/questionsRoutes.js');
