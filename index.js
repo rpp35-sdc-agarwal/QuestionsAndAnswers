@@ -9,6 +9,10 @@ const qRouter = require('./routes/questionsRoutes.js');
 const aRouter = require('./routes/answersRoutes.js');
 const cors = require('cors');
 
+client.on('error', (err) => console.log('Redis Client Error', err));
+
+await client.connect()
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors())

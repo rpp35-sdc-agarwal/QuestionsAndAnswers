@@ -165,9 +165,7 @@ router.get('/:question_id/answers', (req, res) => {
 /////////////////////
 //post
 /////////////////////
-
 router.post('/', (req, res) => {
-
   //insert query that will use the data from the body as its arguments
   //create a new date when the question is recieved, in the millisecond format and send it as a string to the db,
   var date = new Date().valueOf().toString();
@@ -184,7 +182,6 @@ router.post('/', (req, res) => {
 })
 
 router.post('/:question_id/answers', (req, res) => {
-
   var date = new Date().valueOf().toString();
   db.none(
     `INSERT INTO qa.answers (body, date, answerer_name, answer_email, question_id, answer_reported, helpfulness)
