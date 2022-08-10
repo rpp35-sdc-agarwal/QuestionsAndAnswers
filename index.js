@@ -1,11 +1,17 @@
-const newrelic = require('newrelic');
-const express = require('express')
-const app = express()
+// const newrelic = require('newrelic');
+const redis = require('redis');
+const client = redis.createClient({url:'redis://ubuntu@52.52.238.201:6739'});
+const express = require('express');
+const app = express();
 const port = process.env.PORT || 8000;
 const bodyParser = require('body-parser');
 const qRouter = require('./routes/questionsRoutes.js');
 const aRouter = require('./routes/answersRoutes.js');
 const cors = require('cors');
+
+client.on('error', (err) => console.log('Redis Client Error', err));
+
+await client.connect()
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
