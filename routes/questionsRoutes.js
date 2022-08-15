@@ -14,7 +14,7 @@ var redisGet = async function() {
 
 
 router.get('/', (req, res) => {
-
+  console.log(redisGet());
   //parse the req body
   //retrieve the product id, page number if there is one and the result count
   //use redis to get the value stored at the product id
