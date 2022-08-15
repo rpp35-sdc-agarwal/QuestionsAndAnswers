@@ -1,22 +1,24 @@
 const express = require('express');
-const pgp = require('pg-promise')();
-const connConfig = {
-  host: '13.52.106.252',
-  port: 5432,
-  database: 'postgres',
-  user: 'postgres',
-  password: 'root'
-};
-const db = pgp(connConfig);
+const db = require('./connections/db.js');
+const cache = require('./connections/redisConnect.js');
 const router = express.Router();
 
 /////////////////////
 //get
 /////////////////////
+var redisGet = async function() {
+  var redisNil = await cache.get('key');
+  return redisNil;
+}
+
 
 router.get('/', (req, res) => {
+  console.log(redisGet());
   //parse the req body
   //retrieve the product id, page number if there is one and the result count
+  //use redis to get the value stored at the product id
+  //if no value is stored get the data the conventional way
+  //stringify the data and store it in the redis cache
   db.any(`SELECT qa.questions.question_id, question_body, question_date, asker_name, email, question_helpfulness, reported, id, body, date, answerer_name, answer_email, answer_reported, helpfulness, photo_id, url FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.query.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
     .then((data) => {
       var questions = {
@@ -105,7 +107,7 @@ router.get('/', (req, res) => {
 
       res.status(200).send(finalShape);
     })
-    .catch((err) => { console.log(err); res.status(500).send(err)});
+    .catch((err) => {res.status(500).send(err)});
 })
 
 router.get('/:question_id/answers', (req, res) => {
