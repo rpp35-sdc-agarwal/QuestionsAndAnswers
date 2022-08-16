@@ -1,20 +1,17 @@
 const express = require('express');
 const db = require('./connections/db.js');
-const cache = require('./connections/redisConnect.js');
+const client = require('./connections/redisConnect.js');
 const router = express.Router();
 
 /////////////////////
 //get
 /////////////////////
-var redisGet = async function() {
-  await cache.connect();
-  var redisNil = await cache.get('key');
-  return redisNil;
-}
+
 
 
 router.get('/', (req, res) => {
-  console.log(redisGet());
+  client.get('key')
+    .then((value) => {console.log(value);})
   //parse the req body
   //retrieve the product id, page number if there is one and the result count
   //use redis to get the value stored at the product id
