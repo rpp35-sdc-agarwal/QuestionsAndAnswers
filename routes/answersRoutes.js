@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('./connections/db.js');
-// const client = require('./connections/redisConnect.js');
+
 const router = express.Router();
 
 router.put('/:answer_id/helpful', (req, res) => {

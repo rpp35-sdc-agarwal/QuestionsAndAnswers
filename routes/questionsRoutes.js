@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('./connections/db.js');
-// const client = require('./connections/redisConnect.js');
+const client = require('./connections/redisConnect.js');
 const router = express.Router();
 
 /////////////////////
@@ -10,161 +10,176 @@ const router = express.Router();
 
 
 router.get('/', (req, res) => {
-  // console.log('route');
-  // client.set('key', 'hello')
-  //   .then((value) => {console.log(value, 'questions');})
-  //   .catch((err) => {console.log(err);})
-  // client.get('key')
-  //   .then((value) => {console.log(value);})
-  //   .catch((err) => {console.log(err);})
-  //parse the req body
-  //retrieve the product id, page number if there is one and the result count
-  //use redis to get the value stored at the product id
-  //if no value is stored get the data the conventional way
-  //stringify the data and store it in the redis cache
-  db.any(`SELECT qa.questions.question_id, question_body, question_date, asker_name, email, question_helpfulness, reported, id, body, date, answerer_name, answer_email, answer_reported, helpfulness, photo_id, url FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.query.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
-    .then((data) => {
-      var questions = {
-        product_id: req.query.product_id
-      };
-      var photos = {};
-      for (var i = 0; i < data.length; i++) {
-        //if the question exists skip its creation
-        var curr = data[i];
-        var questionId = curr.question_id;
-        var answerId = curr.id;
+  client.get(`product_id:${req.query.product_id}`)
+    .then((value) => {
+      if (value !== null) {
+        res.status(200).send(value);
+      } else {
+        db.any(`SELECT qa.questions.question_id, question_body, question_date, asker_name, email, question_helpfulness, reported, id, body, date, answerer_name, answer_email, answer_reported, helpfulness, photo_id, url FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.query.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
+          .then((data) => {
+            var questions = {
+              product_id: req.query.product_id
+            };
+            var photos = {};
+            for (var i = 0; i < data.length; i++) {
+              //if the question exists skip its creation
+              var curr = data[i];
+              var questionId = curr.question_id;
+              var answerId = curr.id;
 
-        var qDate = new Date(parseInt(curr.question_date));
-        var aDate = new Date(parseInt(curr.date));
+              var qDate = new Date(parseInt(curr.question_date));
+              var aDate = new Date(parseInt(curr.date));
 
-        if (questions[questionId] === undefined) {
-          var newQ = {
-            question_id: questionId,
-            question_body: curr.question_body,
-            question_date: qDate.toJSON(),
-            asker_name: curr.asker_name,
-            question_helpfulness: curr.question_helpfulness,
-            reported: curr.reported,
-            answers: {
-              [answerId]: {
-                id: answerId,
-                body: curr.body,
-                date: aDate.toJSON(),
-                answerer_name: curr.answerer_name,
-                helpfulness: curr.helpfulness,
-                photos: []
+              if (questions[questionId] === undefined) {
+                var newQ = {
+                  question_id: questionId,
+                  question_body: curr.question_body,
+                  question_date: qDate.toJSON(),
+                  asker_name: curr.asker_name,
+                  question_helpfulness: curr.question_helpfulness,
+                  reported: curr.reported,
+                  answers: {
+                    [answerId]: {
+                      id: answerId,
+                      body: curr.body,
+                      date: aDate.toJSON(),
+                      answerer_name: curr.answerer_name,
+                      helpfulness: curr.helpfulness,
+                      photos: []
+                    }
+                  }
+                }
+                if (curr.photo_id) {
+                  var newP = {
+                    photo_id: curr.photo_id,
+                    url: curr.url,
+                  }
+                  newQ.answers[answerId].photos.push(newP);
+                }
+                questions[questionId] = newQ
+              } else if (!questions[questionId].answers[answerId]){
+                questions[questionId].answers[answerId] = {
+                  id: answerId,
+                  body: curr.body,
+                  date: aDate.toJSON(),
+                  answerer_name: curr.answerer_name,
+                  helpfulness: curr.helpfulness,
+                  photos: []
+                }
+                if (curr.photo_id) {
+                  var newP = {
+                    photo_id: curr.photo_id,
+                    url: curr.url,
+                  }
+                  questions[questionId].answers[answerId].photos.push(newP);
+                }
+              } else {
+                //the question and answer are both already defined
+                //we know the photo is not defined as its the only possibility left for this data to exist
+                //create a new photo object and insert it into the current question id and answer id photos array
+                var newP = {
+                  photo_id: curr.photo_id,
+                  url: curr.url,
+                }
+                questions[questionId].answers[answerId].photos.push(newP);
               }
             }
-          }
-          if (curr.photo_id) {
-            var newP = {
-              photo_id: curr.photo_id,
-              url: curr.url,
-            }
-            newQ.answers[answerId].photos.push(newP);
-          }
-          questions[questionId] = newQ
-        } else if (!questions[questionId].answers[answerId]){
-          questions[questionId].answers[answerId] = {
-            id: answerId,
-            body: curr.body,
-            date: aDate.toJSON(),
-            answerer_name: curr.answerer_name,
-            helpfulness: curr.helpfulness,
-            photos: []
-          }
-          if (curr.photo_id) {
-            var newP = {
-              photo_id: curr.photo_id,
-              url: curr.url,
-            }
-            questions[questionId].answers[answerId].photos.push(newP);
-          }
-        } else {
-          //the question and answer are both already defined
-          //we know the photo is not defined as its the only possibility left for this data to exist
-          //create a new photo object and insert it into the current question id and answer id photos array
-          var newP = {
-            photo_id: curr.photo_id,
-            url: curr.url,
-          }
-          questions[questionId].answers[answerId].photos.push(newP);
-        }
-      }
 
-      return questions;
-    })
-    .then((shapedData) => {
-      var results = [];
-      //iterate through the questions object and place all questions in the correct final shape for returning the data
-      for (var questionId in shapedData) {
-        if (questionId === 'product_id') {
-          continue;
-        }
-        results.push(shapedData[questionId]);
+            return questions;
+          })
+          .then((shapedData) => {
+            var results = [];
+            //iterate through the questions object and place all questions in the correct final shape for returning the data
+            for (var questionId in shapedData) {
+              if (questionId === 'product_id') {
+                continue;
+              }
+              results.push(shapedData[questionId]);
+            }
+            var finalShape = {
+              product_id: shapedData.product_id,
+              results: results
+            };
+            finalShape = JSON.stringify(finalShape);
+            client.set(`product_id:${req.query.product_id}`, finalShape);
+            res.status(200).send(finalShape);
+          })
+          .catch((err) => {res.status(500).send(err)});
       }
-      var finalShape = {
-        product_id: shapedData.product_id,
-        results: results
-      };
-
-      res.status(200).send(finalShape);
+      //parse the req body
+      //retrieve the product id, page number if there is one and the result count
+      //use redis to get the value stored at the product id
+      //if no value is stored get the data the conventional way
+      //stringify the data and store it in the redis cache
     })
-    .catch((err) => {res.status(500).send(err)});
+    .catch((err) => {
+      console.log(err);
+    })
 })
 
 router.get('/:question_id/answers', (req, res) => {
-
-
-  db.any(`SELECT id, body, date, answerer_name, answer_reported, helpfulness, photo_id, url FROM qa.answers LEFT JOIN qa.photos ON qa.photos.answer_id = qa.answers.id WHERE question_id = ${req.params.question_id} AND qa.answers.answer_reported = false;`)
-    .then((data) => {
-      //iterate through the data sent from the db
-      var answers = {};
-      for (var i = 0; i < data.length; i++) {
-        var currAns = data[i];
-        var ansId = data[i].id;
-        var phoId = data[i].photo_id
-        if (!answers[ansId]) {
-          var aDate = new Date(parseInt(currAns.date));
-          var newA = {
-            id: ansId,
-            body: currAns.body,
-            date: aDate.toJSON(),
-            answerer_name: currAns.answerer_name,
-            helpfulness: currAns.helpfulness,
-            photos: []
-          }
-          if (currAns.photo_id) {
-            var newP = {
-              photo_id: currAns.photo_id,
-              url: currAns.url,
+  client.get(`question_id:${req.params.question_id}`)
+    .then((value) => {
+      if (value !== null) {
+        res.status(200).send(value);
+      } else {
+        db.any(`SELECT id, body, date, answerer_name, answer_reported, helpfulness, photo_id, url FROM qa.answers LEFT JOIN qa.photos ON qa.photos.answer_id = qa.answers.id WHERE question_id = ${req.params.question_id} AND qa.answers.answer_reported = false;`)
+          .then((data) => {
+            //iterate through the data sent from the db
+            var answers = {};
+            for (var i = 0; i < data.length; i++) {
+              var currAns = data[i];
+              var ansId = data[i].id;
+              var phoId = data[i].photo_id
+              if (!answers[ansId]) {
+                var aDate = new Date(parseInt(currAns.date));
+                var newA = {
+                  id: ansId,
+                  body: currAns.body,
+                  date: aDate.toJSON(),
+                  answerer_name: currAns.answerer_name,
+                  helpfulness: currAns.helpfulness,
+                  photos: []
+                }
+                if (currAns.photo_id) {
+                  var newP = {
+                    photo_id: currAns.photo_id,
+                    url: currAns.url,
+                  }
+                  newA.photos.push(newP);
+                }
+                answers[ansId] = newA;
+              } else {
+                var newP = {
+                  photo_id: currAns.photo_id,
+                  url: currAns.url
+                }
+                answers[ansId].photos.push(newP);
+              }
             }
-            newA.photos.push(newP);
-          }
-          answers[ansId] = newA;
-        } else {
-          var newP = {
-            photo_id: currAns.photo_id,
-            url: currAns.url
-          }
-          answers[ansId].photos.push(newP);
-        }
+            return answers;
+          })
+          .then((answers) => {
+            var results = [];
+            for (var ansId in answers) {
+              results.push(answers[ansId]);
+            }
+            var finalShape = {
+              question: req.params.question_id,
+              count: results.length,
+              results: results
+            }
+
+            finalShape = JSON.stringify(finalShape);
+            client.set(`question_id:${req.params.question_id}`, finalShape);
+            res.status(200).send(finalShape);
+          })
+          .catch((err) => {console.log(err); res.status(500).send(err)});
       }
-      return answers;
     })
-    .then((answers) => {
-      var results = [];
-      for (var ansId in answers) {
-        results.push(answers[ansId]);
-      }
-      var finalShape = {
-        question: req.params.question_id,
-        count: results.length,
-        results: results
-      }
-      res.status(200).send(finalShape);
+    .catch((err) => {
+      res.status(500).send('There was a cache error');
     })
-    .catch((err) => {console.log(err); res.status(500).send(err)});
 })
 
 /////////////////////
