@@ -10,8 +10,13 @@ const router = express.Router();
 
 
 router.get('/', (req, res) => {
-  client.get('key')
-    .then((value) => {console.log(value);})
+  // console.log('route');
+  // client.set('key', 'hello')
+  //   .then((value) => {console.log(value, 'questions');})
+  //   .catch((err) => {console.log(err);})
+  // client.get('key')
+  //   .then((value) => {console.log(value);})
+  //   .catch((err) => {console.log(err);})
   //parse the req body
   //retrieve the product id, page number if there is one and the result count
   //use redis to get the value stored at the product id
