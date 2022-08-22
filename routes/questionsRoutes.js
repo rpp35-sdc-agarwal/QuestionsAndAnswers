@@ -123,7 +123,7 @@ router.get('/:question_id/answers', (req, res) => {
       if (value !== null) {
         res.status(200).send(value);
       } else {
-        db.any(`SELECT qa.questions.question_id, question_body, question_date, asker_name, email, question_helpfulness, reported, id, body, date, answerer_name, answer_email, answer_reported, helpfulness, photo_id, url FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.query.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
+        db.any(`SELECT id, body, date, answerer_name, answer_reported, helpfulness, photo_id, url FROM qa.answers LEFT JOIN qa.photos ON qa.photos.answer_id = qa.answers.id WHERE question_id = ${req.params.question_id} AND qa.answers.answer_reported = false;`)
           .then((data) => {
             //iterate through the data sent from the db
             var answers = {};
