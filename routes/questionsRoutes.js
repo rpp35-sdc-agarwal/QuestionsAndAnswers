@@ -13,6 +13,7 @@ router.get('/', (req, res) => {
   client.get(`product_id:${req.query.product_id}`)
     .then((value) => {
       if (value !== null) {
+        console.log('cache');
         res.status(200).send(value);
       } else {
         db.any(`SELECT qa.questions.question_id, question_body, question_date, asker_name, email, question_helpfulness, reported, id, body, date, answerer_name, answer_email, answer_reported, helpfulness, photo_id, url FROM qa.questions LEFT JOIN qa.answers ON qa.answers.question_id = qa.questions.question_id LEFT JOIN qa.photos ON qa.answers.id = qa.photos.answer_id WHERE product_id = ${req.query.product_id} AND qa.questions.reported = false AND qa.answers.answer_reported = false;`)
